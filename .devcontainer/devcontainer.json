@@ -1,0 +1,24 @@
+{
+	"name": "xqdata dev",
+  "image": "mcr.microsoft.com/devcontainers/python:3.10-bookworm",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"features": {
+		"ghcr.io/va-h/devcontainers-features/uv:1": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+	},
+	"postCreateCommand": "[ -f pyproject.toml ] && (uv lock && uv sync)",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"github.vscode-github-actions",
+				"mhutchie.git-graph",
+        "charliermarsh.ruff"
+			],
+			"settings": {
+				"python.defaultInterpreterPath": "/workspaces/${localWorkspaceFolderBasename}/.venv/bin/python"
+			}
+		}
+	}
+}
