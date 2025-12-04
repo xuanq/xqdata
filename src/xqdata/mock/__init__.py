@@ -3,6 +3,7 @@ import warnings
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Union
 
+import numpy as np
 import pandas as pd
 
 from xqdata.dataapi import DataApi
@@ -144,23 +145,17 @@ class MockDataApi(DataApi):
         dates = pd.date_range(start=start_time, end=end_time, freq=frequency)
 
         # 创建所有组合
-        date_code_combinations = [(date, code) for date in dates for code in codes]
+        index = pd.MultiIndex.from_product(
+            [dates, codes, factors], names=["datetime", "code", "attribute"]
+        )
 
-        # 生成数据
-        data = []
-        for date, code in date_code_combinations:
-            for factor in factors:
-                data.append(
-                    {
-                        "datetime": date,
-                        "code": code,
-                        "attribute": factor,
-                        "value": random.uniform(-100, 100),  # 随机float64值
-                    }
-                )
-
+        # 生成数据, 随机确定均值和方差后，从正态分布中抽样
+        mean = random.uniform(-10, 10)
+        std = random.uniform(1, 5)
+        data = np.random.normal(mean, std, size=len(index))
         # 创建DataFrame
-        df = pd.DataFrame(data)
+        df = pd.DataFrame(data, index=index, columns=["value"])
+        df = df.reset_index()
 
         # 如果需要面板数据格式，则进行透视
         if panel:
