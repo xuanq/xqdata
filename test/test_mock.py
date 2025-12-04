@@ -130,21 +130,21 @@ class TestMockDataApi:
         end_time = "2024-06-30"
         # 日频数据
         df_daily = self.api.get_factor(
-            factors, codes, start_time=start_time, end_time=end_time, frequency="d"
+            factors, codes, start_time=start_time, end_time=end_time, frequency="B"
         )
         assert isinstance(df_daily, pd.DataFrame)
         assert len(df_daily) == 130  # 2024年1月至6月的工作日数量130天
 
         # 周频数据
         df_weekly = self.api.get_factor(
-            factors, codes, start_time=start_time, end_time=end_time, frequency="w"
+            factors, codes, start_time=start_time, end_time=end_time, frequency="W"
         )
         assert isinstance(df_weekly, pd.DataFrame)
         assert len(df_weekly) == 26  # 26周
 
         # 月频数据
         df_monthly = self.api.get_factor(
-            factors, codes, start_time=start_time, end_time=end_time, frequency="m"
+            factors, codes, start_time=start_time, end_time=end_time, frequency="ME"
         )
         assert isinstance(df_monthly, pd.DataFrame)
         assert len(df_monthly) == 6  # 6个月

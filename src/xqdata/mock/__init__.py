@@ -105,7 +105,7 @@ class MockDataApi(DataApi):
         codes: Union[str, List[str]],
         start_time=None,
         end_time=None,
-        frequency="d",
+        frequency="B",
         panel=True,
     ) -> pd.DataFrame:
         """
@@ -116,7 +116,7 @@ class MockDataApi(DataApi):
             codes: 股票代码或代码列表
             start_time: 开始时间
             end_time: 结束时间
-            frequency: 频率 ('d'=日, 'w'=周, 'm'=月)
+            frequency: 频率 pandas Offset aliases ('B'=工作日(默认), 'D'=日, 'W'=周, 'ME'=月)
             panel: 是否返回面板数据格式
 
         Returns:
@@ -141,18 +141,7 @@ class MockDataApi(DataApi):
             end_time = pd.Timestamp(end_time)
 
         # 根据频率生成日期范围
-        if frequency == "d":
-            # 使用工作日
-            dates = pd.bdate_range(start=start_time, end=end_time)
-        elif frequency == "w":
-            # 每周最后一个工作日
-            dates = pd.bdate_range(start=start_time, end=end_time, freq="W")
-        elif frequency == "m":
-            # 每月最后一个工作日
-            dates = pd.bdate_range(start=start_time, end=end_time, freq="BME")
-        else:
-            # 默认使用工作日
-            dates = pd.bdate_range(start=start_time, end=end_time)
+        dates = pd.date_range(start=start_time, end=end_time, freq=frequency)
 
         # 创建所有组合
         date_code_combinations = [(date, code) for date in dates for code in codes]
