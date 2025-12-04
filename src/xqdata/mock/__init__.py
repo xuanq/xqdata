@@ -108,8 +108,84 @@ class MockDataApi(DataApi):
         frequency="d",
         panel=True,
     ) -> pd.DataFrame:
-        # 实现从RQ获取因子数据的逻辑
-        pass
+        """
+        获取模拟的因子数据
+
+        Args:
+            factors: 因子名称或名称列表
+            codes: 股票代码或代码列表
+            start_time: 开始时间
+            end_time: 结束时间
+            frequency: 频率 ('d'=日, 'w'=周, 'm'=月)
+            panel: 是否返回面板数据格式
+
+        Returns:
+            包含因子数据的DataFrame
+        """
+
+        # 确保factors和codes都是列表
+        if isinstance(factors, str):
+            factors = [factors]
+        if isinstance(codes, str):
+            codes = [codes]
+
+        # 设置默认时间范围
+        if start_time is None:
+            start_time = pd.Timestamp.now() - pd.Timedelta(days=365)
+        else:
+            start_time = pd.Timestamp(start_time)
+
+        if end_time is None:
+            end_time = pd.Timestamp.now()
+        else:
+            end_time = pd.Timestamp(end_time)
+
+        # 根据频率生成日期范围
+        if frequency == "d":
+            # 使用工作日
+            dates = pd.bdate_range(start=start_time, end=end_time)
+        elif frequency == "w":
+            # 每周最后一个工作日
+            dates = pd.bdate_range(start=start_time, end=end_time, freq="W")
+        elif frequency == "m":
+            # 每月最后一个工作日
+            dates = pd.bdate_range(start=start_time, end=end_time, freq="BME")
+        else:
+            # 默认使用工作日
+            dates = pd.bdate_range(start=start_time, end=end_time)
+
+        # 创建所有组合
+        date_code_combinations = [(date, code) for date in dates for code in codes]
+
+        # 生成数据
+        data = []
+        for date, code in date_code_combinations:
+            for factor in factors:
+                data.append(
+                    {
+                        "datetime": date,
+                        "code": code,
+                        "attribute": factor,
+                        "value": random.uniform(-100, 100),  # 随机float64值
+                    }
+                )
+
+        # 创建DataFrame
+        df = pd.DataFrame(data)
+
+        # 如果需要面板数据格式，则进行透视
+        if panel:
+            # 使用pivot_table将attribute列展开成面板数据
+            df_pivot = df.pivot_table(
+                index=["datetime", "code"], columns="attribute", values="value"
+            )
+            # 重置列名层级
+            df_pivot.columns.name = None
+            return df_pivot
+        else:
+            # 设置多级索引
+            df_result = df.set_index(["datetime", "code"])
+            return df_result
 
     def get_dualkey_factor(
         self,
