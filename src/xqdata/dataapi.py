@@ -49,7 +49,7 @@ class DataApi(metaclass=ABCMeta):
         codes: Union[str, List[str]],
         start_time: Optional[Union[str, datetime.datetime, datetime.date]] = None,
         end_time: Optional[Union[str, datetime.datetime, datetime.date]] = None,
-        frequency: str = "d",
+        frequency: str = "D",
         panel: bool = True,
     ) -> pd.DataFrame:
         """
@@ -76,7 +76,7 @@ class DataApi(metaclass=ABCMeta):
         objects: Union[str, List[str]],
         start_time: Optional[Union[str, datetime.datetime, datetime.date]] = None,
         end_time: Optional[Union[str, datetime.datetime, datetime.date]] = None,
-        frequency: str = "d",
+        frequency: str = "D",
         panel: bool = True,
     ) -> pd.DataFrame:
         """
@@ -88,7 +88,7 @@ class DataApi(metaclass=ABCMeta):
             objects: 副键（如产品代码）
             start_time: 开始时间
             end_time: 结束时间
-            frequency: 数据频率，默认为日线("d")
+            frequency: 数据频率，默认为日频("D")
             panel: 是否返回面板数据格式
 
         Returns:

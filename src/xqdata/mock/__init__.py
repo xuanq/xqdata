@@ -106,7 +106,7 @@ class MockDataApi(DataApi):
         codes: Union[str, List[str]],
         start_time=None,
         end_time=None,
-        frequency="B",
+        frequency="D",
         panel=True,
     ) -> pd.DataFrame:
         """
@@ -117,7 +117,7 @@ class MockDataApi(DataApi):
             codes: 股票代码或代码列表
             start_time: 开始时间
             end_time: 结束时间
-            frequency: 频率 pandas Offset aliases ('B'=工作日(默认), 'D'=日, 'W'=周, 'ME'=月)
+            frequency: 频率 pandas Offset aliases ('B'=工作日, 'D'=日(默认), 'W'=周, 'ME'=月)
             panel: 是否返回面板数据格式
 
         Returns:
@@ -178,7 +178,7 @@ class MockDataApi(DataApi):
         objects: Union[str, List[str]],
         start_time=None,
         end_time=None,
-        frequency="B",
+        frequency="D",
         panel=True,
     ) -> pd.DataFrame:
         """
@@ -190,7 +190,7 @@ class MockDataApi(DataApi):
             objects: 对象代码或代码列表
             start_time: 开始时间
             end_time: 结束时间
-            frequency: 频率 pandas Offset aliases ('B'=工作日(默认), 'D'=日, 'W'=周, 'ME'=月)
+            frequency: 频率 pandas Offset aliases ('B'=工作日, 'D'=日(默认), 'W'=周, 'ME'=月)
             panel: 是否返回面板数据格式
 
         Returns:
