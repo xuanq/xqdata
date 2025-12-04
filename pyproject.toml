@@ -1,6 +1,6 @@
 [project]
 name = "xqdata"
-version = "0.2.0.dev1"
+version = "0.2.0rc1"
 description = "统一适配rqdata/火富牛API等数据源"
 readme = "README.md"
 authors = [

@@ -132,21 +132,106 @@ class TestMockDataApi:
         df_daily = self.api.get_factor(
             factors, codes, start_time=start_time, end_time=end_time, frequency="B"
         )
-        assert isinstance(df_daily, pd.DataFrame)
         assert len(df_daily) == 130  # 2024年1月至6月的工作日数量130天
 
         # 周频数据
         df_weekly = self.api.get_factor(
             factors, codes, start_time=start_time, end_time=end_time, frequency="W"
         )
-        assert isinstance(df_weekly, pd.DataFrame)
         assert len(df_weekly) == 26  # 26周
 
         # 月频数据
         df_monthly = self.api.get_factor(
             factors, codes, start_time=start_time, end_time=end_time, frequency="ME"
         )
-        assert isinstance(df_monthly, pd.DataFrame)
+        assert len(df_monthly) == 6  # 6个月
+
+    def test_get_dualkey_factor_default(self):
+        """测试默认的get_dualkey_factor行为"""
+        # 测试单个因子
+        df = self.api.get_dualkey_factor("pe_ratio", "000001.XSHE", "market")
+        assert isinstance(df, pd.DataFrame)
+        assert not df.empty
+        # 检查索引层级
+        assert df.index.names == ["datetime", "code", "object"]
+        assert df.columns == ["pe_ratio"]
+
+    def test_get_dualkey_factor_multiple_factors_panel_true(self):
+        """测试多个因子且panel=True"""
+        factors = ["pe_ratio", "pb_ratio", "ps_ratio"]
+        codes = ["000001.XSHE", "000002.XSHE"]
+        objects = ["market", "industry"]
+
+        df = self.api.get_dualkey_factor(factors, codes, objects, panel=True)
+        # 检查索引层级
+        assert len(df.index.names) == 3  # datetime, code, object
+        # 检查列是否为因子名称
+        assert set(df.columns) == set(factors)
+
+    def test_get_dualkey_factor_multiple_factors_panel_false(self):
+        """测试多个因子且panel=False"""
+        factors = ["pe_ratio", "pb_ratio"]
+        codes = ["000001.XSHE", "000002.XSHE"]
+        objects = ["market", "industry"]
+
+        df = self.api.get_dualkey_factor(factors, codes, objects, panel=False)
+        # 检查索引层级
+        assert len(df.index.names) == 3  # datetime, code, object
+        assert df.columns.to_list() == ["attribute", "value"]
+
+    def test_get_dualkey_factor_with_time_range(self):
+        """测试带时间范围的get_dualkey_factor"""
+        factors = ["pe_ratio"]
+        codes = ["000001.XSHE"]
+        objects = ["market"]
+
+        start_time = "2024-01-01"
+        end_time = "2024-01-31"
+
+        df = self.api.get_dualkey_factor(
+            factors, codes, objects, start_time=start_time, end_time=end_time
+        )
+        assert df.index.get_level_values("datetime").min() >= pd.to_datetime(start_time)
+        assert df.index.get_level_values("datetime").max() <= pd.to_datetime(end_time)
+
+    def test_get_dualkey_factor_with_frequency(self):
+        """测试不同频率的get_dualkey_factor"""
+        factors = ["pe_ratio"]
+        codes = ["000001.XSHE"]
+        objects = ["market"]
+        start_time = "2024-01-01"
+        end_time = "2024-06-30"
+        # 日频数据
+        df_daily = self.api.get_dualkey_factor(
+            factors,
+            codes,
+            objects,
+            start_time=start_time,
+            end_time=end_time,
+            frequency="B",
+        )
+        assert len(df_daily) == 130  # 2024年1月至6月的工作日数量130天
+
+        # 周频数据
+        df_weekly = self.api.get_dualkey_factor(
+            factors,
+            codes,
+            objects,
+            start_time=start_time,
+            end_time=end_time,
+            frequency="W",
+        )
+        assert len(df_weekly) == 26  # 26周
+
+        # 月频数据
+        df_monthly = self.api.get_dualkey_factor(
+            factors,
+            codes,
+            objects,
+            start_time=start_time,
+            end_time=end_time,
+            frequency="ME",
+        )
         assert len(df_monthly) == 6  # 6个月
 
 
