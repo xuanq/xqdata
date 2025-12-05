@@ -58,28 +58,24 @@ class RQDataApi(DataApi):
     def auth(self, username=None, password=None):
         return rq.init(username=username, password=password)
 
-    def get_info(self, types=None, **kwargs) -> Optional[pd.DataFrame]:
+    def get_info(self, type: str, **kwargs) -> Optional[pd.DataFrame]:
         """
         获取基础信息数据
 
         Args:
-            types: 信息类型，字符串
+            type: 信息类型，字符串
             **kwargs: 查询参数
 
         Returns:
             包含所需信息的DataFrame，如果获取失败则返回None
         """
-        # 如果没有指定类型，直接调用原始方法
-        if types is None:
-            return rq.all_instruments(**kwargs)
-
         # 检查是否有对应类型的配置
-        if types not in self.info_config:
+        if type not in self.info_config:
             # 如果没有配置，直接调用原始方法
-            return rq.all_instruments(type=types, **kwargs)
+            return rq.all_instruments(type=type, **kwargs)
 
         # 获取配置
-        config = self.info_config[types]
+        config = self.info_config[type]
 
         # 合并参数
         params = config["rq_params"].copy()

@@ -27,14 +27,12 @@ class DataApi(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_info(
-        self, types: Optional[str] = None, **kwargs: Any
-    ) -> Optional[pd.DataFrame]:
+    def get_info(self, type: str, **kwargs: Any) -> Optional[pd.DataFrame]:
         """
         获取基础信息数据
 
         Args:
-            types: 信息类型，字符串
+            type: 信息类型，字符串
             **kwargs: 查询参数,必须在type返回的df的columns中
 
         Returns:
