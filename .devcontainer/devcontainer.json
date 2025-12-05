@@ -7,14 +7,20 @@
 		"ghcr.io/devcontainers/features/github-cli:1": {},
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
 	},
-	"postCreateCommand": "[ -f pyproject.toml ] && (uv lock && uv sync) || :",
+	"containerEnv": {
+		"RQ_LICENSE": "${localEnv:RQ_LICENSE}",
+		"HFN_APPID": "${localEnv:HFN_APPID}",
+		"HFN_APPKEY": "${localEnv:HFN_APPKEY}"
+	},
+	"postCreateCommand": "[ -f pyproject.toml ] && (uv lock && uv sync --all-extras) || :",
 	"customizations": {
 		"vscode": {
 			"extensions": [
 				"ms-python.python",
 				"github.vscode-github-actions",
 				"mhutchie.git-graph",
-				"charliermarsh.ruff"
+				"charliermarsh.ruff",
+				"marscode.marscode-extension"
 			],
 			"settings": {
 				"python.defaultInterpreterPath": "/workspaces/${localWorkspaceFolderBasename}/.venv/bin/python",
