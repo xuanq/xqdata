@@ -7,54 +7,13 @@ import rqdatac as rq
 
 from xqdata.dataapi import DataApi
 
+from .config import INFO_CONFIG
+
 
 class RQDataApi(DataApi):
     def __init__(self):
         # 配置管理不同类型的信息查询
-        self.info_config = {
-            "stock": {
-                "rq_func": rq.all_instruments,
-                "rq_params": {"type": "CS"},
-                "post_process": None,
-                "post_process_args": {},
-            },
-            "fund": {
-                "rq_func": rq.all_instruments,
-                "rq_params": {"type": "FUND"},
-                "post_process": None,
-                "post_process_args": {},
-            },
-            "futures": {
-                "rq_func": rq.all_instruments,
-                "rq_params": {"type": "Future"},
-                "post_process": None,
-                "post_process_args": {},
-            },
-            "option": {
-                "rq_func": rq.all_instruments,
-                "rq_params": {"type": "Option"},
-                "post_process": None,
-                "post_process_args": {},
-            },
-            "convertible": {
-                "rq_func": rq.all_instruments,
-                "rq_params": {"type": "Convertible"},
-                "post_process": None,
-                "post_process_args": {},
-            },
-            "etf": {
-                "rq_func": rq.all_instruments,
-                "rq_params": {"type": "ETF"},
-                "post_process": None,
-                "post_process_args": {},
-            },
-            "lof": {
-                "rq_func": rq.all_instruments,
-                "rq_params": {"type": "LOF"},
-                "post_process": None,
-                "post_process_args": {},
-            },
-        }
+        self.info_config = INFO_CONFIG.copy()
 
     def auth(self, username=None, password=None):
         return rq.init(username=username, password=password)

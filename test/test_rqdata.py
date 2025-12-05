@@ -27,134 +27,106 @@ class TestRQDataApi:
 
     def test_get_info_stock(self):
         """测试获取股票信息"""
-        try:
-            # 获取股票信息
-            df_stock = self.api.get_info("stock")
+        # 获取股票信息
+        df_stock = self.api.get_info("stock")
 
-            # 验证返回的是DataFrame或者是None
-            assert isinstance(df_stock, pd.DataFrame)
+        # 验证返回的是DataFrame或者是None
+        assert isinstance(df_stock, pd.DataFrame)
 
-            # 如果返回了数据，验证包含基本列
-            if not df_stock.empty:
-                expected_columns = [
-                    "order_book_id",
-                    "symbol",
-                    "type",
-                    "listed_date",
-                    "de_listed_date",
-                ]
-                assert all(col in df_stock.columns for col in expected_columns)
-        except Exception as e:
-            # 如果出现异常，可能是由于网络或权限问题
-            pytest.skip(f"无法获取股票信息: {str(e)}")
+        # 如果返回了数据，验证包含基本列
+        if not df_stock.empty:
+            expected_columns = [
+                "code",
+                "symbol",
+                "type",
+                "listed_date",
+                "de_listed_date",
+            ]
+            assert all(col in df_stock.columns for col in expected_columns)
 
     def test_get_info_fund(self):
         """测试获取基金信息"""
-        try:
-            # 获取基金信息
-            df_fund = self.api.get_info("fund")
+        # 获取基金信息
+        df_fund = self.api.get_info("fund")
 
-            # 验证返回的是DataFrame或者是None
-            assert isinstance(df_fund, pd.DataFrame)
+        # 验证返回的是DataFrame或者是None
+        assert isinstance(df_fund, pd.DataFrame)
 
-            # 如果返回了数据，验证包含基本列
-            if not df_fund.empty:
-                expected_columns = [
-                    "order_book_id",
-                    "symbol",
-                    "type",
-                    "listed_date",
-                    "de_listed_date",
-                ]
-                assert all(col in df_fund.columns for col in expected_columns)
-        except Exception as e:
-            # 如果出现异常，可能是由于网络或权限问题
-            pytest.skip(f"无法获取基金信息: {str(e)}")
+        # 如果返回了数据，验证包含基本列
+        if not df_fund.empty:
+            expected_columns = [
+                "code",
+                "symbol",
+                "type",
+                "listed_date",
+                "de_listed_date",
+            ]
+            assert all(col in df_fund.columns for col in expected_columns)
 
     def test_get_info_futures(self):
         """测试获取期货信息"""
-        try:
-            # 获取期货信息
-            df_futures = self.api.get_info("futures")
+        # 获取期货信息
+        df_futures = self.api.get_info("futures")
 
-            # 验证返回的是DataFrame或者是None
-            assert isinstance(df_futures, pd.DataFrame)
+        # 验证返回的是DataFrame或者是None
+        assert isinstance(df_futures, pd.DataFrame)
 
-            # 如果返回了数据，验证包含基本列
-            if not df_futures.empty:
-                expected_columns = [
-                    "order_book_id",
-                    "symbol",
-                    "type",
-                    "listed_date",
-                    "de_listed_date",
-                ]
-                assert all(col in df_futures.columns for col in expected_columns)
-        except Exception as e:
-            # 如果出现异常，可能是由于网络或权限问题
-            pytest.skip(f"无法获取期货信息: {str(e)}")
+        # 如果返回了数据，验证包含基本列
+        if not df_futures.empty:
+            expected_columns = [
+                "code",
+                "symbol",
+                "type",
+                "listed_date",
+                "de_listed_date",
+            ]
+            assert all(col in df_futures.columns for col in expected_columns)
 
     def test_get_info_etf(self):
         """测试获取ETF信息"""
-        try:
-            # 获取ETF信息
-            df_etf = self.api.get_info("etf")
+        # 获取ETF信息
+        df_etf = self.api.get_info("etf")
 
-            # 验证返回的是DataFrame或者是None
-            assert isinstance(df_etf, pd.DataFrame)
+        # 验证返回的是DataFrame或者是None
+        assert isinstance(df_etf, pd.DataFrame)
 
-            # 如果返回了数据，验证包含基本列
-            if not df_etf.empty:
-                expected_columns = [
-                    "order_book_id",
-                    "symbol",
-                    "type",
-                    "listed_date",
-                    "de_listed_date",
-                ]
-                assert all(col in df_etf.columns for col in expected_columns)
-        except Exception as e:
-            # 如果出现异常，可能是由于网络或权限问题
-            pytest.skip(f"无法获取ETF信息: {str(e)}")
+        # 如果返回了数据，验证包含基本列
+        if not df_etf.empty:
+            expected_columns = [
+                "code",
+                "symbol",
+                "type",
+                "listed_date",
+                "de_listed_date",
+            ]
+            assert all(col in df_etf.columns for col in expected_columns)
 
     def test_get_info_unregistered_type(self):
         """测试获取未注册类型的信息"""
-        try:
-            # 获取未注册类型的信息，应该发出警告并返回空DataFrame
-            with pytest.warns(
-                UserWarning,
-                match="No configuration for info type 'CSS'. Return empty DataFrame.",
-            ):
-                df = self.api.get_info("CSS")  # CSS是没有注册的类型
-            # 验证返回的是空DataFrame
-            assert df.empty
-        except Exception as e:
-            # 如果出现异常，可能是由于网络或权限问题
-            pytest.skip(f"无法获取未注册类型信息: {str(e)}")
+        # 获取未注册类型的信息，应该发出警告并返回空DataFrame
+        with pytest.warns(
+            UserWarning,
+            match="No configuration for info type 'CSS'. Return empty DataFrame.",
+        ):
+            df = self.api.get_info("CSS")  # CSS是没有注册的类型
+        # 验证返回的是空DataFrame
+        assert df.empty
 
     def test_register_new_info_type(self):
         """测试注册新的信息类型"""
         import rqdatac as rq
 
-        from xqdata.rq.api import RQDataApi
+        # 注册新的信息类型
+        self.api.register_info_type(
+            "test_stock", rq.all_instruments, {"type": "CS"}, None, {}
+        )
 
-        try:
-            # 确保api是RQDataApi实例
-            if isinstance(self.api, RQDataApi):
-                # 注册新的信息类型
-                self.api.register_info_type(
-                    "test_stock", rq.all_instruments, {"type": "CS"}, None, {}
-                )
+        # 验证新类型已注册
+        assert "test_stock" in self.api.info_config
 
-                # 验证新类型已注册
-                assert "test_stock" in self.api.info_config
+        # 使用新类型获取信息
+        df_test_stock = self.api.get_info("test_stock")
+        df_stock = self.api.get_info("stock")
 
-                # 使用新类型获取信息
-                df_test_stock = self.api.get_info("test_stock")
-                df_stock = self.api.get_info("stock")
-
-                # 验证返回的和stock一样
-                assert df_test_stock.equals(df_stock)
-        except Exception as e:
-            # 如果出现异常，可能是由于网络或权限问题
-            pytest.skip(f"无法测试注册新信息类型: {str(e)}")
+        # 验证返回的和stock一样
+        assert df_test_stock.equals(df_stock)
