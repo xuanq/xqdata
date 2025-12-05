@@ -116,9 +116,11 @@ class TestRQDataApi:
         """测试注册新的信息类型"""
         import rqdatac as rq
 
+        from xqdata.rq.func import rename_columns
+
         # 注册新的信息类型
         self.api.register_info_type(
-            "test_stock", rq.all_instruments, {"type": "CS"}, None, {}
+            "test_stock", rq.all_instruments, {"type": "CS"}, rename_columns, {}
         )
 
         # 验证新类型已注册
