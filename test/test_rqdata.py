@@ -9,15 +9,21 @@ from xqdata.dataapi import get_dataapi
 class TestRQDataApi:
     """测试RQData API的功能"""
 
+    @classmethod
+    def setup_class(cls):
+        """整个测试类执行前的准备，只执行一次"""
+        cls.api = get_dataapi("rq")
+        try:
+            # 尝试进行身份验证，只执行一次
+            cls.api.auth("license", os.getenv("RQ_LICENSE", ""))
+        except Exception:
+            # 如果无法进行身份验证，跳过整个测试类
+            pytest.skip("无法连接到RQData API，请检查网络连接和认证信息")
+
     def setup_method(self):
         """每个测试方法执行前的准备"""
-        self.api = get_dataapi("rq")
-        try:
-            # 尝试进行身份验证
-            self.api.auth("license", os.getenv("RQ_LICENSE", ""))
-        except Exception:
-            # 如果无法进行身份验证，跳过测试
-            pytest.skip("无法连接到RQData API，请检查网络连接和认证信息")
+        # 确保api实例可用
+        pass
 
     def test_get_info_stock(self):
         """测试获取股票信息"""
@@ -26,10 +32,10 @@ class TestRQDataApi:
             df_stock = self.api.get_info("stock")
 
             # 验证返回的是DataFrame或者是None
-            assert isinstance(df_stock, (pd.DataFrame, type(None)))
+            assert isinstance(df_stock, pd.DataFrame)
 
             # 如果返回了数据，验证包含基本列
-            if df_stock is not None and not df_stock.empty:
+            if not df_stock.empty:
                 expected_columns = [
                     "order_book_id",
                     "symbol",
@@ -49,10 +55,10 @@ class TestRQDataApi:
             df_fund = self.api.get_info("fund")
 
             # 验证返回的是DataFrame或者是None
-            assert isinstance(df_fund, (pd.DataFrame, type(None)))
+            assert isinstance(df_fund, pd.DataFrame)
 
             # 如果返回了数据，验证包含基本列
-            if df_fund is not None and not df_fund.empty:
+            if not df_fund.empty:
                 expected_columns = [
                     "order_book_id",
                     "symbol",
@@ -72,10 +78,10 @@ class TestRQDataApi:
             df_futures = self.api.get_info("futures")
 
             # 验证返回的是DataFrame或者是None
-            assert isinstance(df_futures, (pd.DataFrame, type(None)))
+            assert isinstance(df_futures, pd.DataFrame)
 
             # 如果返回了数据，验证包含基本列
-            if df_futures is not None and not df_futures.empty:
+            if not df_futures.empty:
                 expected_columns = [
                     "order_book_id",
                     "symbol",
@@ -95,10 +101,10 @@ class TestRQDataApi:
             df_etf = self.api.get_info("etf")
 
             # 验证返回的是DataFrame或者是None
-            assert isinstance(df_etf, (pd.DataFrame, type(None)))
+            assert isinstance(df_etf, pd.DataFrame)
 
             # 如果返回了数据，验证包含基本列
-            if df_etf is not None and not df_etf.empty:
+            if not df_etf.empty:
                 expected_columns = [
                     "order_book_id",
                     "symbol",
@@ -114,11 +120,14 @@ class TestRQDataApi:
     def test_get_info_unregistered_type(self):
         """测试获取未注册类型的信息"""
         try:
-            # 获取未注册类型的信息，应该直接调用原始方法
-            df = self.api.get_info("CS")  # CS是股票类型代码
-
-            # 验证返回的是DataFrame或者是None
-            assert isinstance(df, (pd.DataFrame, type(None)))
+            # 获取未注册类型的信息，应该发出警告并返回空DataFrame
+            with pytest.warns(
+                UserWarning,
+                match="No configuration for info type 'CSS'. Return empty DataFrame.",
+            ):
+                df = self.api.get_info("CSS")  # CSS是没有注册的类型
+            # 验证返回的是空DataFrame
+            assert df.empty
         except Exception as e:
             # 如果出现异常，可能是由于网络或权限问题
             pytest.skip(f"无法获取未注册类型信息: {str(e)}")
@@ -134,17 +143,18 @@ class TestRQDataApi:
             if isinstance(self.api, RQDataApi):
                 # 注册新的信息类型
                 self.api.register_info_type(
-                    "test_type", rq.all_instruments, {"type": "CS"}, None, {}
+                    "test_stock", rq.all_instruments, {"type": "CS"}, None, {}
                 )
 
                 # 验证新类型已注册
-                assert "test_type" in self.api.info_config
+                assert "test_stock" in self.api.info_config
 
                 # 使用新类型获取信息
-                df = self.api.get_info("test_type")
+                df_test_stock = self.api.get_info("test_stock")
+                df_stock = self.api.get_info("stock")
 
-                # 验证返回的是DataFrame或者是None
-                assert isinstance(df, (pd.DataFrame, type(None)))
+                # 验证返回的和stock一样
+                assert df_test_stock.equals(df_stock)
         except Exception as e:
             # 如果出现异常，可能是由于网络或权限问题
             pytest.skip(f"无法测试注册新信息类型: {str(e)}")

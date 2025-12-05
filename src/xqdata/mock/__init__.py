@@ -1,7 +1,7 @@
 import random
 import warnings
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 import numpy as np
 import pandas as pd
@@ -72,7 +72,7 @@ class MockDataApi(DataApi):
 
         return pd.DataFrame(data)
 
-    def get_info(self, type: str, **kwargs) -> Optional[pd.DataFrame]:
+    def get_info(self, type: str, **kwargs) -> pd.DataFrame:
         """
         获取模拟的基础信息数据
 

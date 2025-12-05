@@ -27,7 +27,7 @@ class DataApi(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_info(self, type: str, **kwargs: Any) -> Optional[pd.DataFrame]:
+    def get_info(self, type: str, **kwargs: Any) -> pd.DataFrame:
         """
         获取基础信息数据
 
@@ -36,7 +36,7 @@ class DataApi(metaclass=ABCMeta):
             **kwargs: 查询参数,必须在type返回的df的columns中
 
         Returns:
-            包含所需信息的DataFrame，如果获取失败则返回None
+            包含所需信息的DataFrame，如果获取失败则返回空DataFrame
         """
         pass
 

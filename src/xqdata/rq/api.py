@@ -1,3 +1,4 @@
+import warnings
 from datetime import date, datetime
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -58,7 +59,7 @@ class RQDataApi(DataApi):
     def auth(self, username=None, password=None):
         return rq.init(username=username, password=password)
 
-    def get_info(self, type: str, **kwargs) -> Optional[pd.DataFrame]:
+    def get_info(self, type: str, **kwargs) -> pd.DataFrame:
         """
         获取基础信息数据
 
@@ -71,8 +72,11 @@ class RQDataApi(DataApi):
         """
         # 检查是否有对应类型的配置
         if type not in self.info_config:
-            # 如果没有配置，直接调用原始方法
-            return rq.all_instruments(type=type, **kwargs)
+            # 如果没有配置，warning并返回空DataFrame
+            warnings.warn(
+                f"No configuration for info type '{type}'. Return empty DataFrame."
+            )
+            return pd.DataFrame()
 
         # 获取配置
         config = self.info_config[type]

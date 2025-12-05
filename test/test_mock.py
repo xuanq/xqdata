@@ -14,7 +14,6 @@ class TestMockDataApi:
     def test_get_info_without_schema(self):
         """测试未设置schema时的行为"""
         # 尝试获取未设置schema的信息类型
-        # df = self.api.get_info("nonexistent")
         # 应该返回空的DataFrame并打印警告
         # 检查是否打印了警告
         with pytest.warns(
