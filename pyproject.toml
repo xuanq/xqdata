@@ -21,6 +21,11 @@ dev = [
 [project.scripts]
 xqdata = "xqdata:main"
 
+[project.optional-dependencies]
+rq = [
+    "rqdatac>=3.3.2",
+]
+
 [build-system]
 requires = ["uv_build>=0.9.15,<0.10.0"]
 build-backend = "uv_build"
