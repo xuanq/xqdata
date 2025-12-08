@@ -7,4 +7,6 @@ def rename_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     if "order_book_id" in df.columns:
         df.rename(columns={"order_book_id": "code"}, inplace=True)
+    if "date" in df.columns:
+        df.rename(columns={"date": "datetime"}, inplace=True)
     return df

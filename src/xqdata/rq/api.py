@@ -7,13 +7,15 @@ import rqdatac as rq
 
 from xqdata.dataapi import DataApi
 
-from .config import INFO_CONFIG
+from .config import FACTOR_CONFIG, INFO_CONFIG
 
 
 class RQDataApi(DataApi):
     def __init__(self):
         # 配置管理不同类型的信息查询
         self.info_config = INFO_CONFIG.copy()
+        # 配置管理不同因子的查询
+        self.factor_config = FACTOR_CONFIG.copy()
 
     def auth(self, username=None, password=None):
         return rq.init(username=username, password=password)
@@ -27,7 +29,7 @@ class RQDataApi(DataApi):
             **kwargs: 查询参数
 
         Returns:
-            包含所需信息的DataFrame，如果获取失败则返回None
+            包含所需信息的DataFrame，如果获取失败则返回空DataFrame
         """
         # 检查是否有对应类型的配置
         if type not in self.info_config:
@@ -54,8 +56,9 @@ class RQDataApi(DataApi):
 
             return result
         except Exception:
-            # 如果出现异常，返回None
-            return None
+            # 如果出现异常，返回空DataFrame
+            warnings.warn(f"Error fetching info type '{type}'. Return empty DataFrame.")
+            return pd.DataFrame()
 
     def register_info_type(
         self,
@@ -91,41 +94,28 @@ class RQDataApi(DataApi):
         frequency: str = "D",
         panel: bool = True,
     ) -> pd.DataFrame:
+        """
+        获取因子数据
+
+        Args:
+            factors: 因子名称，可以是单个字符串或字符串列表
+            codes: 证券代码，可以是单个字符串或字符串列表
+            start_time: 开始时间
+            end_time: 结束时间
+            frequency: 数据频率，默认为日频
+            panel: 是否返回面板数据格式
+
+        Returns:
+            包含因子数据的DataFrame
+        """
         # 确保factors和codes都是列表
         if isinstance(factors, str):
             factors = [factors]
         if isinstance(codes, str):
             codes = [codes]
 
-        # 调用RQData的get_factor方法
-        try:
-            data = rq.get_factor(
-                order_book_ids=codes,
-                factor=factors,
-                start_date=start_time,
-                end_date=end_time,
-                expect_df=True,
-            )
-
-            if data is None or data.empty:
-                return pd.DataFrame()
-
-            # 重置索引
-            data = data.reset_index()
-
-            # 根据panel参数决定返回格式
-            if panel:
-                return data
-            else:
-                # 转换为长格式
-                data_melted = data.melt(
-                    id_vars=["datetime", "order_book_id"],
-                    var_name="attribute",
-                    value_name="value",
-                )
-                return data_melted
-        except Exception:
-            return pd.DataFrame()
+        # 按照配置对因子进行分组，具有相同配置的因子合并查询以节约查询次数
+        pass
 
     # if "is_paused" in factors:
     #     paused_data = _is_suspended(codes, start_time, end_time)

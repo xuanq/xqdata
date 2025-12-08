@@ -116,7 +116,7 @@ class TestRQDataApi:
         """测试注册新的信息类型"""
         import rqdatac as rq
 
-        from xqdata.rq.func import rename_columns
+        from xqdata.rq.func_factor import rename_columns
 
         # 注册新的信息类型
         self.api.register_info_type(
