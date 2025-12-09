@@ -6,7 +6,6 @@ import pandas as pd
 import rqdatac as rq
 
 from xqdata.dataapi import DataApi
-
 from .config import FACTOR_CONFIG, INFO_CONFIG
 
 
@@ -114,139 +113,65 @@ class RQDataApi(DataApi):
         if isinstance(codes, str):
             codes = [codes]
 
+        # 初始化结果DataFrame
+        data = pd.DataFrame()
+        
         # 按照配置对因子进行分组，具有相同配置的因子合并查询以节约查询次数
-        pass
+        # 创建一个字典来存储每个查询函数对应的因子列表
+        func_factor_map = {}
+        
+        # 遍历所有请求的因子
+        for factor in factors:
+            # 查找因子对应的配置
+            if factor in self.factor_config:
+                func = self.factor_config[factor]
+                # 将因子添加到对应的查询函数列表中
+                if func not in func_factor_map:
+                    func_factor_map[func] = []
+                func_factor_map[func].append(factor)
+            else:
+                # 如果因子没有配置，使用默认配置
+                func = self.factor_config.get("default", None)
+                if func:
+                    if func not in func_factor_map:
+                        func_factor_map[func] = []
+                    func_factor_map[func].append(factor)
+        
+        # 对每组因子执行查询并将结果合并
+        for func, factor_group in func_factor_map.items():
+            try:
+                # 调用对应的查询函数
+                result = func(
+                    factors=factor_group,
+                    codes=codes,
+                    start_time=start_time,
+                    end_time=end_time,
+                    frequency=frequency
+                )
+                
+                # 如果返回了数据，则合并到主DataFrame中
+                if result is not None and not result.empty:
+                    if data.empty:
+                        data = result
+                    else:
+                        # 合并数据，基于索引进行合并
+                        data = data.merge(result, left_index=True, right_index=True, how='outer')
+            except Exception as e:
+                # 如果某个查询出错，记录警告但继续处理其他因子
+                warnings.warn(f"Error fetching factors {factor_group}: {str(e)}")
+        
+        # 如果没有数据，返回空的DataFrame
+        if data.empty:
+            return data
+            
+        # 根据panel参数决定返回的数据格式
+        if not panel:
+            # 转换为长格式
+            data = data.stack().reset_index(level=-1)
+            data.columns = ['attribute','value']
+        return data
+        
 
-    # if "is_paused" in factors:
-    #     paused_data = _is_suspended(codes, start_time, end_time)
-    #     data["is_paused"] = paused_data
-
-    # if "is_st" in factors:
-    #     st_data = _is_st_stock(codes, start_time, end_time)
-    #     data["is_st"] = st_data
-
-    # price_factors = [
-    #     f
-    #     for f in factors
-    #     if f
-    #     in (
-    #         "open",
-    #         "high",
-    #         "low",
-    #         "close",
-    #         "volume",
-    #         "amount",
-    #         "trading_date",
-    #         "last",
-    #         "prev_close",
-    #         "total_turnover",
-    #         "limit_up",
-    #         "limit_down",
-    #         "a1",
-    #         "a2",
-    #         "a3",
-    #         "a4",
-    #         "a5",
-    #         "b1",
-    #         "b2",
-    #         "b3",
-    #         "b4",
-    #         "b5",
-    #         "a1_v",
-    #         "a2_v",
-    #         "a3_v",
-    #         "a4_v",
-    #         "a5_v",
-    #         "b1_v",
-    #         "b2_v",
-    #         "b3_v",
-    #         "b4_v",
-    #         "b5_v",
-    #         "change_rate",
-    #         "num_trades",
-    #         "open_interest",
-    #         "prev_settlement",
-    #     )
-    # ]
-
-    # if price_factors:
-    #     price_data = _get_price(
-    #         codes, start_time, end_time, frequency=frequency, fields=price_factors
-    #     )
-    #     data[price_factors] = price_data[price_factors]
-
-    # for adjust_type in ("post", "pre"):
-    #     adjust_factors = [f for f in factors if f.endswith(f"_{adjust_type}")]
-    #     fields = [f.split("_")[0] for f in adjust_factors]
-    #     if adjust_factors:
-    #         price_data = _get_price(
-    #             codes,
-    #             start_time,
-    #             end_time,
-    #             frequency=frequency,
-    #             fields=fields,
-    #             adjust=adjust_type,
-    #         )
-    #         price_data = price_data.add_suffix(f"_{adjust_type}")
-    #         data[adjust_factors] = price_data[adjust_factors]
-
-    # risk_factors = [
-    #     "momentum",
-    #     "beta",
-    #     "book_to_price",
-    #     "earnings_yield",
-    #     "liquidity",
-    #     "size",
-    #     "residual_volatility",
-    #     "non_linear_size",
-    #     "leverage",
-    #     "growth",
-    # ]
-    # queryed_risk_factors = [f for f in factors if f in risk_factors]
-    # if queryed_risk_factors:
-    #     risk_factor_data = _get_factor_exposure(
-    #         codes, start_time, end_time, queryed_risk_factors
-    #     )
-    #     data[queryed_risk_factors] = risk_factor_data[queryed_risk_factors]
-
-    # pattern = r"^(citics|gildata|citics_2019)_l(\d)"
-    # query_industry = [
-    #     (re.findall(pattern, f)[0][0], int(re.findall(pattern, f)[0][1]))
-    #     for f in factors
-    #     if len(re.findall(pattern, f)) > 0
-    # ]
-    # if len(query_industry) > 0:
-    #     temp_df = []
-    #     for industry, level in query_industry:
-    #         temp_df.append(
-    #             pd.concat(
-    #                 [
-    #                     _get_instrument_industry(
-    #                         codes=codes, source=industry, level=level, date=date
-    #                     )
-    #                     for date in pd.date_range(start_time, end_time)
-    #                 ]
-    #             )
-    #         )
-    #     industry_df = pd.concat(temp_df, axis=1)
-
-    #     cols = industry_df.columns.intersection(factors)
-    #     data[cols] = industry_df[cols]
-
-    # if data.empty:
-    #     return data
-
-    # if panel:
-    #     return data
-    # else:
-    #     data.columns.name = "factorname"
-    #     data = data.stack().to_frame()
-    #     data.columns = ["value"]
-    #     data = Factordf(data)
-    #     if df:
-    #         return data
-    #     else:
-    #         return data.to_datacls()
 
     def get_dualkey_factor(
         self,

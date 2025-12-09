@@ -14,23 +14,104 @@ def rq_get_price(
     end_time: Optional[Union[str, datetime, date]] = None,
     frequency: str = "D",
 ) -> pd.DataFrame:
-    # args map
-    if "post" in factors[0]:
-        adjust = "post"
-    if "pre" in factors[0]:
-        adjust = "pre"
-    else:
-        adjust = "none"
+    # Ensure factors is a list
+    if isinstance(factors, str):
+        factors = [factors]
+    if isinstance(codes, str):
+        codes = [codes]
+        
+    # Define all valid price fields
+    valid_price_fields = (
+        "open", "high", "low", "close", "volume", "trading_date", 
+        "last", "prev_close", "total_turnover", "limit_up", "limit_down", 
+        "a1", "a2", "a3", "a4", "a5", "b1", "b2", "b3", "b4", "b5", 
+        "a1_v", "a2_v", "a3_v", "a4_v", "a5_v", "b1_v", "b2_v", "b3_v", "b4_v", "b5_v", 
+        "change_rate", "num_trades", "open_interest", "prev_settlement"
+    )
+    
+    # Initialize result dataframe
+    data = pd.DataFrame()
+    
+    # Process regular price factors (without adjustment)
+    price_factors = [
+        f for f in factors if f in valid_price_fields
+    ]
+    
+    if price_factors:
+        # Get data for regular price factors
+        price_data = _get_price_internal(
+            codes, start_time, end_time, frequency=frequency, fields=price_factors, adjust_type="none"
+        )
+        if not price_data.empty:
+            # Merge with result data
+            if data.empty:
+                data = price_data
+            else:
+                data = data.merge(price_data, on=["datetime", "code"], how="outer")
+    
+    # Process adjusted factors (post and pre)
+    for adjust_type in ("post", "pre"):
+        adjust_factors = [f for f in factors if f.endswith(f"_{adjust_type}")]
+        # Extract base field names (e.g., "open" from "open_post")
+        fields = [f.split(f"_{adjust_type}")[0] for f in adjust_factors]
+        
+        if adjust_factors:
+            # Get data for adjusted price factors
+            price_data = _get_price_internal(
+                codes,
+                start_time,
+                end_time,
+                frequency=frequency,
+                fields=fields,
+                adjust_type=adjust_type,
+            )
+            
+            if not price_data.empty:
+                # Add suffix to match requested factor names
+                price_data = price_data.add_suffix(f"_{adjust_type}")
+                # Rename datetime and code columns back (they shouldn't have suffix)
+                price_data.rename(columns={
+                    f"datetime_{adjust_type}": "datetime",
+                    f"code_{adjust_type}": "code"
+                }, inplace=True)
+                
+                # Select only the requested adjusted factors
+                price_data = price_data[["datetime", "code"] + adjust_factors]
+                
+                # Merge with result data
+                if data.empty:
+                    data = price_data
+                else:
+                    data = data.merge(price_data, on=["datetime", "code"], how="outer")
+    
+    if data.empty:
+        return data
+    
+    return data.set_index(["datetime", "code"])
 
-    frequency = "1" + frequency.lower()
+
+def _get_price_internal(
+    codes: Union[str, List[str]],
+    start_time: Optional[Union[str, datetime, date]],
+    end_time: Optional[Union[str, datetime, date]],
+    frequency: str,
+    fields: List[str],
+    adjust_type: str,
+) -> pd.DataFrame:
+    """Internal helper function to get price data from RQData"""
+    if frequency != "tick":
+        if frequency.lower() == "min":
+            frequency = "m"
+        frequency = "1" + frequency.lower()
     if isinstance(start_time, str):
         start_time = pd.Timestamp(start_time)
     if isinstance(end_time, str):
         end_time = pd.Timestamp(end_time)
-    # 期货分钟频以上夜盘算下一日，需要特殊处理
+        
+    # Special handling for futures night trading
     true_end_date = end_time
     if any(unit in frequency.lower() for unit in {"ms", "s", "min", "h"}):
-        if end_time.hour >= 21:
+        if end_time and end_time.hour >= 21:
             true_end_date = rq.get_next_trading_date(end_time)
 
     # get_data
@@ -39,33 +120,65 @@ def rq_get_price(
         start_date=start_time,
         end_date=true_end_date,
         frequency=frequency,
-        fields=factors,
-        adjust_type=adjust,
+        fields=fields,
+        adjust_type=adjust_type,
         skip_suspended=False,
         market="cn",
         expect_df=True,
         time_slice=None,
     )
-    if data is None:
+    
+    if data is None or data.empty:
         return pd.DataFrame()
-    if data.empty:
-        return data
-    else:
-        data = data.reset_index()
+    
+    data = data.reset_index()
     # map column names
     rename_columns(data)
-    data = data[(data.datetime >= start_time) & (data.datetime <= end_time)]
-    return data.set_index(["datetime", "code"])
+    
+    # Filter by actual date range
+    if start_time and end_time:
+        data = data[(data.datetime >= start_time) & (data.datetime <= end_time)]
+        
+    return data
 
 
 def rq_get_factor(
-    codes: str | List[str],
-    factors: str | List[str],
-    start_date=None,
-    end_date=None,
-    df=True,
+    factors: Union[str, List[str]],
+    codes: Union[str, List[str]],
+    start_time: Optional[Union[str, datetime, date]] = None,
+    end_time: Optional[Union[str, datetime, date]] = None,
+    frequency: str = "D",
 ):
-    pass
+    # args map
+    if isinstance(codes, str):
+        codes = [codes]
+    if isinstance(factors, str):
+        factors = [factors]
+    
+    # Convert datetime objects to strings if needed
+    if isinstance(start_time, (datetime, date)):
+        start_time = start_time.strftime('%Y-%m-%d')
+    if isinstance(end_time, (datetime, date)):
+        end_time = end_time.strftime('%Y-%m-%d')
+    
+    # get_data
+    data: pd.DataFrame = rq.get_factor(
+        order_book_ids=codes,
+        factor=factors,
+        start_date=start_time,
+        end_date=end_time,
+        expect_df=True,
+    )
+    
+    if data is None or data.empty:
+        return pd.DataFrame()
+    else:
+        data = data.reset_index()
+    
+    # map column names
+    rename_columns(data)
+    
+    return data.set_index(["datetime", "code"])
 
 
 #     # args map

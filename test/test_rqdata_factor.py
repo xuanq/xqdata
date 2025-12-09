@@ -24,18 +24,18 @@ class TestRQDataFactorApi:
         # 确保api实例可用
         pass
 
-    def test_rq_get_factor_post(self):
+    def test_rq_get_price_1d(self):
         """测试内部的rq_get_price函数"""
         from xqdata.rq.func_factor import rq_get_price
 
-        factors = ["open_post", "close_post"]
-        codes = ["000001.XSHE", "000002.XSHE"]
+        factors = ["open","close","open_post", "close_post"]
+        codes = ["000001.XSHE", "300750.XSHE"]
 
         df = rq_get_price(
             factors=factors,
             codes=codes,
-            start_time="2023-01-01",
-            end_time="2023-01-10",
+            start_time="2025-01-01",
+            end_time="2025-01-10",
             frequency="D",
         )
 
@@ -44,3 +44,117 @@ class TestRQDataFactorApi:
         # 验证包含请求的因子列
         for factor in factors:
             assert factor in df.columns
+        # 平安银行2025-01-10的收盘价11.30（不复权）
+        assert df.loc[("2025-01-10 00:00:00", "000001.XSHE"), "close"] == 11.30
+        assert df.loc[("2025-01-10 00:00:00", "300750.XSHE"), "close_post"] == pytest.approx(459.11964)
+        assert len(df) == 14  # 7交易日 * 2只股票
+
+    def test_rq_get_price_1m(self):
+        """测试内部的rq_get_price函数"""
+        from xqdata.rq.func_factor import rq_get_price
+
+        factors = ["open_post", "close_post"]
+        codes = ["000001.XSHE", "300750.XSHE"]
+
+        df = rq_get_price(
+            factors=factors,
+            codes=codes,
+            start_time="2025-01-02 09:30:00",
+            end_time="2025-01-02 15:00:00",
+            frequency="min",
+        )
+
+        # 验证包含必要的列
+        assert df.index.names == ["datetime", "code"]
+        # 验证包含请求的因子列
+        for factor in factors:
+            assert factor in df.columns
+        
+        assert len(df) == 480  # 240分钟 * 2只股票
+
+
+    def test_rq_get_price_tick(self):
+        """测试内部的rq_get_price函数"""
+        from xqdata.rq.func_factor import rq_get_price
+
+        factors = ["a1", "b1"]
+        codes = ["000001.XSHE", "300750.XSHE"]
+
+        df = rq_get_price(
+            factors=factors,
+            codes=codes,
+            start_time="2025-01-02 10:00:03",
+            end_time="2025-01-02 10:02:00",
+            frequency="tick",
+        )
+
+        # 验证包含必要的列
+        assert df.index.names == ["datetime", "code"]
+        # 验证包含请求的因子列
+        for factor in factors:
+            assert factor in df.columns
+        
+        assert len(df) == 80  # 20tick/min * 2分钟 * 2只股票
+
+    def test_rq_get_factor(self):
+        """测试内部的rq_get_price函数"""
+        from xqdata.rq.func_factor import rq_get_factor
+
+        factors = ["pe_ratio", "pb_ratio"]
+        codes = ["000001.XSHE", "300750.XSHE"]
+
+        df = rq_get_factor(
+            factors=factors,
+            codes=codes,
+            start_time="2025-01-02",
+            end_time="2025-01-10",
+            frequency="D",
+        )
+
+        # 验证包含必要的列
+        assert df.index.names == ["datetime", "code"]
+        # 验证包含请求的因子列
+        for factor in factors:
+            assert factor in df.columns
+        
+        assert len(df) == 14  # 7交易日 * 2只股票
+
+
+    def test_api_get_factor_nopanel(self):
+        """测试API的get_factor方法"""
+        factors = ["pe_ratio", "pb_ratio","open_post","close_post"]
+        codes = ["000001.XSHE", "300750.XSHE"]
+
+        df = self.api.get_factor(
+            factors=factors,
+            codes=codes,
+            start_time="2025-01-02",
+            end_time="2025-01-10",
+            frequency="D",
+            panel=False,
+        )
+
+        # 验证包含必要的列
+        assert df.columns.tolist() == ["attribute", "value"]
+        
+        assert len(df) == 56  # 7交易日 * 2只股票 * 4因子
+    
+    def test_api_get_factor_panel(self):
+        """测试API的get_factor方法"""
+        factors = ["pe_ratio", "pb_ratio","open_post","close_post","ebit_lyr"] #ebit_lyr尚未定义，引用default的rq_get_factor获取
+        codes = ["000001.XSHE", "300750.XSHE"]
+
+        df = self.api.get_factor(
+            factors=factors,
+            codes=codes,
+            start_time="2025-01-02",
+            end_time="2025-01-10",
+            frequency="D",
+            panel=True,
+        )
+
+        # 验证包含请求的因子列
+        for factor in factors:
+            assert factor in df.columns
+        
+        assert len(df) == 14  # 7交易日 * 2只股票
