@@ -6,7 +6,7 @@ import pandas as pd
 import rqdatac as rq
 
 from xqdata.dataapi import DataApi
-from .config import FACTOR_CONFIG, INFO_CONFIG
+from .config import FACTOR_CONFIG, INFO_CONFIG, FACTOR_EXTRA_PARAMS
 
 
 class RQDataApi(DataApi):
@@ -15,6 +15,8 @@ class RQDataApi(DataApi):
         self.info_config = INFO_CONFIG.copy()
         # 配置管理不同因子的查询
         self.factor_config = FACTOR_CONFIG.copy()
+        # 存储额外参数的字典
+        self._extra_params = {}
 
     def auth(self, username=None, password=None):
         return rq.init(username=username, password=password)
@@ -84,6 +86,19 @@ class RQDataApi(DataApi):
             "post_process_args": post_process_args or {},
         }
 
+    def set_extra_param(self, func_name: str, param_name: str, param_value: Any):
+        """
+        设置函数的额外参数
+
+        Args:
+            func_name: 函数名称
+            param_name: 参数名称
+            param_value: 参数值
+        """
+        if func_name not in self._extra_params:
+            self._extra_params[func_name] = {}
+        self._extra_params[func_name][param_name] = param_value
+
     def get_factor(
         self,
         factors: Union[str, List[str]],
@@ -140,15 +155,30 @@ class RQDataApi(DataApi):
         # 对每组因子执行查询并将结果合并
         for func, factor_group in func_factor_map.items():
             try:
-                # 调用对应的查询函数
-                result = func(
-                    factors=factor_group,
-                    codes=codes,
-                    start_time=start_time,
-                    end_time=end_time,
-                    frequency=frequency,
-                )
+                # 准备调用参数
+                kwargs = {
+                    "factors": factor_group,
+                    "codes": codes,
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "frequency": frequency,
+                }
 
+                # 如果该函数有额外参数配置，则添加这些参数
+                func_name = func.__name__
+                if func_name in FACTOR_EXTRA_PARAMS:
+                    # 获取允许的额外参数列表
+                    allowed_params = FACTOR_EXTRA_PARAMS[func_name]
+                    # 添加已设置的额外参数
+                    if func_name in self._extra_params:
+                        for param_name, param_value in self._extra_params[
+                            func_name
+                        ].items():
+                            # 只添加允许的参数
+                            if param_name in allowed_params:
+                                kwargs[param_name] = param_value
+                # 调用对应的查询函数
+                result = func(**kwargs)
                 # 如果返回了数据，则合并到主DataFrame中
                 if result is not None and not result.empty:
                     if data.empty:

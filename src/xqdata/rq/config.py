@@ -151,3 +151,9 @@ FACTOR_CONFIG = {
     "leverage": rq_get_factor_exposure,
     "growth": rq_get_factor_exposure,
 }
+
+
+FACTOR_EXTRA_PARAMS = {
+    "rq_get_price": ["skip_suspended", "market"],
+    "rq_get_factor_exposure": ["industry_mapping", "model", "market"],
+}

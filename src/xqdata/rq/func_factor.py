@@ -14,6 +14,7 @@ def rq_get_price(
     start_time: Optional[Union[str, datetime, date]] = None,
     end_time: Optional[Union[str, datetime, date]] = None,
     frequency: str = "D",
+    **kwargs,
 ) -> pd.DataFrame:
     # Ensure factors is a list
     if isinstance(factors, str):
@@ -75,6 +76,7 @@ def rq_get_price(
             frequency=frequency,
             fields=price_factors,
             adjust_type="none",
+            **kwargs,
         )
         if not price_data.empty:
             # Merge with result data
@@ -98,6 +100,7 @@ def rq_get_price(
                 frequency=frequency,
                 fields=fields,
                 adjust_type=adjust_type,
+                **kwargs,
             )
 
             if not price_data.empty:
@@ -134,6 +137,7 @@ def _get_price_internal(
     frequency: str,
     fields: List[str],
     adjust_type: str,
+    **kwargs,
 ) -> pd.DataFrame:
     """Internal helper function to get price data from RQData"""
     if frequency != "tick":
@@ -159,10 +163,7 @@ def _get_price_internal(
         frequency=frequency,
         fields=fields,
         adjust_type=adjust_type,
-        skip_suspended=False,
-        market="cn",
-        expect_df=True,
-        time_slice=None,
+        **kwargs,
     )
 
     if data is None or data.empty:
@@ -185,6 +186,7 @@ def rq_get_factor(
     start_time: Optional[Union[str, datetime, date]] = None,
     end_time: Optional[Union[str, datetime, date]] = None,
     frequency: str = "D",
+    **kwargs,
 ):
     # args map
     if isinstance(codes, str):
@@ -205,6 +207,7 @@ def rq_get_factor(
         start_date=start_time,
         end_date=end_time,
         expect_df=True,
+        **kwargs,
     )
 
     if data is None or data.empty:
@@ -224,13 +227,14 @@ def rq_is_suspended(
     start_time: Optional[Union[str, datetime, date]] = None,
     end_time: Optional[Union[str, datetime, date]] = None,
     frequency: str = "D",
+    **kwargs,
 ):
     # args map
     if isinstance(codes, str):
         codes = [codes]
     # get_data
     data: pd.DataFrame = rq.is_suspended(
-        order_book_ids=codes, start_date=start_time, end_date=end_time, market="cn"
+        order_book_ids=codes, start_date=start_time, end_date=end_time, **kwargs
     )
     data = data.stack()
     data.index.names = ["datetime", "code"]
@@ -245,11 +249,17 @@ def rq_is_st_stock(
     start_time: Optional[Union[str, datetime, date]] = None,
     end_time: Optional[Union[str, datetime, date]] = None,
     frequency: str = "D",
+    **kwargs,
 ):
     # args map
     if isinstance(codes, str):
         codes = [codes]
-    data: pd.DataFrame = rq.is_st_stock(codes, start_time, end_time)
+    data: pd.DataFrame = rq.is_st_stock(
+        codes,
+        start_time,
+        end_time,
+        **kwargs,
+    )
     data = data.stack()
     data.index.names = ["datetime", "code"]
     data.name = "is_st"
@@ -263,6 +273,7 @@ def rq_get_instrument_industry(
     start_time: Optional[Union[str, datetime, date]] = None,
     end_time: Optional[Union[str, datetime, date]] = None,
     frequency: str = "D",
+    **kwargs,
 ):
     # args map
     if isinstance(codes, str):
@@ -295,7 +306,11 @@ def rq_get_instrument_industry(
             try:
                 # get_data
                 data: pd.DataFrame = rq.get_instrument_industry(
-                    codes, source=industry, level=level, date=d
+                    codes,
+                    source=industry,
+                    level=level,
+                    date=d,
+                    **kwargs,
                 ).reset_index()
                 # Add datetime column
                 data["datetime"] = d

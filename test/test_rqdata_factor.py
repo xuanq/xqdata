@@ -259,3 +259,30 @@ class TestRQDataFactorApi:
             assert factor in df.columns
 
         assert len(df) == 14  # 7交易日 * 2只股票
+
+    def test_api_get_factor_panel_extra_param(self):
+        """测试API的get_factor方法设置额外参数"""
+        factors = [
+            "Liquidity",
+            "size",
+        ]  # ebit_lyr尚未定义，引用default的rq_get_factor获取
+        codes = ["000001.XSHE", "300750.XSHE"]
+        default_param_df = self.api.get_factor(
+            factors=factors,
+            codes=codes,
+            start_time="2025-01-02",
+            end_time="2025-01-10",
+            frequency="D",
+            panel=True,
+        )  
+        self.api.set_extra_param("rq_get_factor_exposure", "model", "v2")
+        extra_param_df = self.api.get_factor(
+            factors=factors,
+            codes=codes,
+            start_time="2025-01-02",
+            end_time="2025-01-10",
+            frequency="D",
+            panel=True,
+        )
+
+        assert extra_param_df.equals(default_param_df) is False
