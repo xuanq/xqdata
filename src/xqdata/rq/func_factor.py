@@ -314,8 +314,10 @@ def rq_get_instrument_industry(
             "order_book_id": "code",
         }
         temp_df.append(
-            pd.concat(temp_df_per_day, axis=0) #每天的数据合并
-            .rename(columns=MAPPER) #重命名order_book_id->code和first_industry_code->citics_l1等
+            pd.concat(temp_df_per_day, axis=0)  # 每天的数据合并
+            .rename(
+                columns=MAPPER
+            )  # 重命名order_book_id->code和first_industry_code->citics_l1等
             .set_index(["datetime", "code"])
         )
 
@@ -327,6 +329,35 @@ def rq_get_instrument_industry(
     result_df = pd.concat(temp_df, axis=1)
     cols = result_df.columns.intersection(factors)
     return result_df[cols]
+
+
+def rq_get_factor_exposure(
+    factors: Union[str, List[str]],
+    codes: Union[str, List[str]],
+    start_time: Optional[Union[str, datetime, date]] = None,
+    end_time: Optional[Union[str, datetime, date]] = None,
+    frequency: str = "D",
+    **kwargs,
+):
+    # args map
+    if isinstance(codes, str):
+        codes = [codes]
+    # get_data
+    data: pd.DataFrame = rq.get_factor_exposure(
+        order_book_ids=codes,
+        start_date=start_time,
+        end_date=end_time,
+        factors=factors,
+        **kwargs,
+    )
+    if data is None or data.empty:
+        return pd.DataFrame()
+    else:
+        data = data.reset_index()
+    # map column names
+    rename_columns(data)
+    # fomat data
+    return data.set_index(["datetime", "code"])
 
 
 # def _get_shares(codes: str | List[str], start_date, end_date, fields=None):
@@ -357,43 +388,6 @@ def rq_get_instrument_industry(
 #     ).reset_index()
 #     # map column names
 #     data.rename(columns=FIELDS_MAPPER, inplace=True)
-#     # map codes
-#     reversed_code_mapper = {v: k for k, v in code_mapper.items()}
-#     data.code = data.code.map(reversed_code_mapper)
-#     # fomat data
-#     return data.set_index(["datetime", "code"])
-
-
-# def _get_factor_exposure(
-#     codes: str | List[str],
-#     start_date,
-#     end_date,
-#     factors=None,
-#     industry_mapping="citics2019",
-#     model="v1",
-# ):
-#     # args map
-#     if isinstance(codes, str):
-#         codes = [codes]
-#     code_mapper = get_code_mapper(codes)
-#     rq_codes = [code_mapper.get(code, code) for code in codes]
-#     # get_data
-#     data: pd.DataFrame = rq.get_factor_exposure(
-#         rq_codes,
-#         start_date,
-#         end_date,
-#         factors=factors,
-#         industry_mapping=industry_mapping,
-#         model=model,
-#     )
-#     if data is None:
-#         return None
-#     if data.empty:
-#         return None
-#     else:
-#         data = data.reset_index()
-#     # map column names
-#     data.rename(columns=FIELDS_RQ2XQ, inplace=True)
 #     # map codes
 #     reversed_code_mapper = {v: k for k, v in code_mapper.items()}
 #     data.code = data.code.map(reversed_code_mapper)

@@ -189,6 +189,29 @@ class TestRQDataFactorApi:
         assert len(df.columns) == 3
         assert len(df) == 14  # 7交易日 * 2只股票
 
+    def test_rq_get_factor_exposure(self):
+        """测试内部的rq_get_instrument_industry函数"""
+        from xqdata.rq.func_factor import rq_get_factor_exposure
+
+        factors = ["momentum", "beta", "size"]
+        codes = ["000001.XSHE", "300750.XSHE"]
+
+        df = rq_get_factor_exposure(
+            factors=factors,
+            codes=codes,
+            start_time="2025-01-02",
+            end_time="2025-01-10",
+            frequency="D",
+        )
+
+        # 验证包含必要的列
+        assert df.index.names == ["datetime", "code"]
+        # 验证包含请求的因子列
+        for factor in factors:
+            assert factor in df.columns
+        assert len(df.columns) == 3
+        assert len(df) == 14  # 7交易日 * 2只股票
+
     def test_api_get_factor_nopanel(self):
         """测试API的get_factor方法"""
         factors = ["pe_ratio", "pb_ratio", "open_post", "close_post"]
@@ -218,6 +241,7 @@ class TestRQDataFactorApi:
             "cticis_2019_l1",
             "is_st",
             "ebit_lyr",
+            "size",
         ]  # ebit_lyr尚未定义，引用default的rq_get_factor获取
         codes = ["000001.XSHE", "300750.XSHE"]
 

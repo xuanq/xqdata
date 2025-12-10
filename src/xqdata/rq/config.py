@@ -6,6 +6,7 @@ from .func_factor import (
     rq_is_suspended,
     rq_is_st_stock,
     rq_get_instrument_industry,
+    rq_get_factor_exposure,
 )
 from .utils import rename_columns
 
@@ -138,4 +139,15 @@ FACTOR_CONFIG = {
     "close_pre": rq_get_price,
     "volume_pre": rq_get_price,
     "total_turnover_pre": rq_get_price,
+    # 风格因子
+    "momentum": rq_get_factor_exposure,
+    "beta": rq_get_factor_exposure,
+    "book_to_price": rq_get_factor_exposure,
+    "earnings_yield": rq_get_factor_exposure,
+    "liquidity": rq_get_factor_exposure,
+    "size": rq_get_factor_exposure,
+    "residual_volatility": rq_get_factor_exposure,
+    "non_linear_size": rq_get_factor_exposure,
+    "leverage": rq_get_factor_exposure,
+    "growth": rq_get_factor_exposure,
 }
