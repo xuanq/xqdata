@@ -1,6 +1,12 @@
 import rqdatac as rq
 
-from .func_factor import rq_get_factor, rq_get_price
+from .func_factor import (
+    rq_get_factor,
+    rq_get_price,
+    rq_is_suspended,
+    rq_is_st_stock,
+    rq_get_instrument_industry,
+)
 from .utils import rename_columns
 
 # RQData API配置
@@ -55,13 +61,42 @@ FACTOR_CONFIG = {
     "pe_ratio": rq_get_factor,
     "pb_ratio": rq_get_factor,
     "ps_ratio": rq_get_factor,
+    # ST
+    "is_st": rq_is_st_stock,
+    # 停牌
+    "is_paused": rq_is_suspended,
+    # 行业
+    "citics_2019_l1": rq_get_instrument_industry,
+    "citics_2019_l1_name": rq_get_instrument_industry,
+    "citics_2019_l2": rq_get_instrument_industry,
+    "citics_2019_l2_name": rq_get_instrument_industry,
+    "citics_2019_l3": rq_get_instrument_industry,
+    "citics_2019_l3_name": rq_get_instrument_industry,
+    "citics_l1": rq_get_instrument_industry,
+    "citics_l1_name": rq_get_instrument_industry,
+    "citics_l2": rq_get_instrument_industry,
+    "citics_l2_name": rq_get_instrument_industry,
+    "citics_l3": rq_get_instrument_industry,
+    "citics_l3_name": rq_get_instrument_industry,
+    "sws_l1": rq_get_instrument_industry,
+    "sws_l1_name": rq_get_instrument_industry,
+    "sws_l2": rq_get_instrument_industry,
+    "sws_l2_name": rq_get_instrument_industry,
+    "sws_l3": rq_get_instrument_industry,
+    "sws_l3_name": rq_get_instrument_industry,
+    "hsi_l1": rq_get_instrument_industry,
+    "hsi_l1_name": rq_get_instrument_industry,
+    "hsi_l2": rq_get_instrument_industry,
+    "hsi_l2_name": rq_get_instrument_industry,
+    "hsi_l3": rq_get_instrument_industry,
+    "hsi_l3_name": rq_get_instrument_industry,
     # 行情因子
     "open": rq_get_price,
     "high": rq_get_price,
     "low": rq_get_price,
     "close": rq_get_price,
     "volume": rq_get_price,
-    "total_turnover": rq_get_price,    
+    "total_turnover": rq_get_price,
     "trading_date": rq_get_price,
     "last": rq_get_price,
     "prev_close": rq_get_price,

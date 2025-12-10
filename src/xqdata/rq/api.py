@@ -115,11 +115,11 @@ class RQDataApi(DataApi):
 
         # 初始化结果DataFrame
         data = pd.DataFrame()
-        
+
         # 按照配置对因子进行分组，具有相同配置的因子合并查询以节约查询次数
         # 创建一个字典来存储每个查询函数对应的因子列表
         func_factor_map = {}
-        
+
         # 遍历所有请求的因子
         for factor in factors:
             # 查找因子对应的配置
@@ -136,7 +136,7 @@ class RQDataApi(DataApi):
                     if func not in func_factor_map:
                         func_factor_map[func] = []
                     func_factor_map[func].append(factor)
-        
+
         # 对每组因子执行查询并将结果合并
         for func, factor_group in func_factor_map.items():
             try:
@@ -146,32 +146,32 @@ class RQDataApi(DataApi):
                     codes=codes,
                     start_time=start_time,
                     end_time=end_time,
-                    frequency=frequency
+                    frequency=frequency,
                 )
-                
+
                 # 如果返回了数据，则合并到主DataFrame中
                 if result is not None and not result.empty:
                     if data.empty:
                         data = result
                     else:
                         # 合并数据，基于索引进行合并
-                        data = data.merge(result, left_index=True, right_index=True, how='outer')
+                        data = data.merge(
+                            result, left_index=True, right_index=True, how="outer"
+                        )
             except Exception as e:
                 # 如果某个查询出错，记录警告但继续处理其他因子
                 warnings.warn(f"Error fetching factors {factor_group}: {str(e)}")
-        
+
         # 如果没有数据，返回空的DataFrame
         if data.empty:
             return data
-            
+
         # 根据panel参数决定返回的数据格式
         if not panel:
             # 转换为长格式
             data = data.stack().reset_index(level=-1)
-            data.columns = ['attribute','value']
+            data.columns = ["attribute", "value"]
         return data
-        
-
 
     def get_dualkey_factor(
         self,
