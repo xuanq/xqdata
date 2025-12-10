@@ -27,18 +27,16 @@ class DataApi(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_info(
-        self, types: Optional[str] = None, **kwargs: Any
-    ) -> Optional[pd.DataFrame]:
+    def get_info(self, type: str, **kwargs: Any) -> pd.DataFrame:
         """
         获取基础信息数据
 
         Args:
-            types: 信息类型，字符串
+            type: 信息类型，字符串
             **kwargs: 查询参数,必须在type返回的df的columns中
 
         Returns:
-            包含所需信息的DataFrame，如果获取失败则返回None
+            包含所需信息的DataFrame，如果获取失败则返回空DataFrame
         """
         pass
 
@@ -73,7 +71,7 @@ class DataApi(metaclass=ABCMeta):
         self,
         factors: Union[str, List[str]],
         codes: Union[str, List[str]],
-        objects: Union[str, List[str]],
+        objects: Union[str, List[str]] = None,
         start_time: Optional[Union[str, datetime.datetime, datetime.date]] = None,
         end_time: Optional[Union[str, datetime.datetime, datetime.date]] = None,
         frequency: str = "D",

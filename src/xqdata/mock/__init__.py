@@ -1,7 +1,7 @@
 import random
 import warnings
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 import numpy as np
 import pandas as pd
@@ -72,27 +72,27 @@ class MockDataApi(DataApi):
 
         return pd.DataFrame(data)
 
-    def get_info(self, types: Optional[str] = None, **kwargs) -> Optional[pd.DataFrame]:
+    def get_info(self, type: str, **kwargs) -> pd.DataFrame:
         """
         获取模拟的基础信息数据
 
         Args:
-            types: 信息类型名称
+            type: 信息类型名称
             **kwargs: 过滤条件，例如 listed_date>="2024-01-01"
 
         Returns:
             符合要求的DataFrame
         """
         # 检查是否设置了该类型的schema
-        if types not in self._mock_info_schemas:
+        if type not in self._mock_info_schemas:
             # raise warning and return empty DataFrame
             warnings.warn(
-                f"No mock schema set for type '{types}'. Returning empty DataFrame."
+                f"No mock schema set for type '{type}'. Returning empty DataFrame."
             )
             return pd.DataFrame()
 
         # 获取schema
-        schema = self._mock_info_schemas[types]
+        schema = self._mock_info_schemas[type]
 
         # 生成随机长度的模拟数据 (30-100)
         length = random.randint(30, 100)
@@ -175,7 +175,7 @@ class MockDataApi(DataApi):
         self,
         factors: Union[str, List[str]],
         codes: Union[str, List[str]],
-        objects: Union[str, List[str]],
+        objects: Union[str, List[str]] = None,
         start_time=None,
         end_time=None,
         frequency="D",
