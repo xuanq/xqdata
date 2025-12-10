@@ -197,7 +197,7 @@ class RQDataApi(DataApi):
         self,
         factors: Union[str, List[str]],
         codes: Union[str, List[str]],
-        objects: Union[str, List[str]],
+        objects: Union[str, List[str]] = None,
         start_time: Optional[Union[str, datetime, date]] = None,
         end_time: Optional[Union[str, datetime, date]] = None,
         frequency: str = "D",
@@ -208,8 +208,6 @@ class RQDataApi(DataApi):
             factors = [factors]
         if isinstance(codes, str):
             codes = [codes]
-        if isinstance(objects, str):
-            objects = [objects]
 
         # 目前只实现了简单的占位符实现
         # 在实际应用中，这里会根据具体的双键因子类型调用相应的RQData接口

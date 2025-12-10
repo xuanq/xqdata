@@ -396,24 +396,35 @@ def rq_get_shares(
     return data.set_index(["datetime", "code"])
 
 
-# def _index_weights_ex(code: str, start_date=None, end_date=None):
-#     # args map
-#     code_mapper = get_code_mapper(code)
-#     rq_code = code_mapper.get(code, code)
+def rq_index_weights_ex(
+    factors: Union[str, List[str]],
+    codes: Union[str, List[str]],
+    objects: Union[str, List[str]] = None,
+    start_time: Optional[Union[str, datetime, date]] = None,
+    end_time: Optional[Union[str, datetime, date]] = None,
+    frequency: str = "D",
+    **kwargs,
+):
+    if isinstance(codes, str):
+        codes = [codes]
 
-#     # get_data
-#     data: pd.DataFrame = rq.index_weights_ex(
-#         order_book_id=rq_code, start_date=start_date, end_date=end_date
-#     )
-#     if data is None:
-#         return None
-#     if data.empty:
-#         return None
-#     else:
-#         data = data.reset_index()
-#     # map column names
-#     data.rename(columns=FIELDS_RQ2XQ, inplace=True)
-#     # map constituent codes
-#     data.code = convert_code(data.code)
-#     # fomat data
-#     return data.set_index(["datetime", "code"])
+    # get_data
+    def get_single_data(code):
+        data: pd.DataFrame = rq.index_weights_ex(
+            order_book_id=code, start_date=start_time, end_date=end_time, **kwargs
+        ).reset_index()
+        data["code"] = code
+        return data
+
+    data: pd.DataFrame = pd.concat([get_single_data(code) for code in codes], axis=0)
+    data.rename(
+        columns={
+            "order_book_id": "object",
+            "date": "datetime",
+            "weight": "constituent_weight",
+        },
+        inplace=True,
+    )
+
+    # fomat data
+    return data.set_index(["datetime", "code", "object"])
