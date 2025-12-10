@@ -48,8 +48,8 @@ class TestRQDataApi:
         """测试获取指定日期可交易的股票信息"""
         # 获取股票信息
         df_stock_full = self.api.get_info("stock")
-        df_stock_dated = self.api.get_info("stock",date=pd.Timestamp("2025-01-02"))
-        assert len(df_stock_full)>len(df_stock_dated)
+        df_stock_dated = self.api.get_info("stock", date=pd.Timestamp("2025-01-02"))
+        assert len(df_stock_full) > len(df_stock_dated)
 
     def test_get_info_fund(self):
         """测试获取基金信息"""
@@ -122,9 +122,11 @@ class TestRQDataApi:
     def test_get_info_tradedays_with_param(self):
         """测试获取区间交易日信息(带额外参数)"""
         # 获取ETF信息
-        df_tradedays = self.api.get_info("tradedays", start_date="2025-01-01", end_date="2025-01-10")
+        df_tradedays = self.api.get_info(
+            "tradedays", start_date="2025-01-01", end_date="2025-01-10"
+        )
         # 验证返回的是DataFrame或者是None
-        assert len(df_tradedays) == 9 #共计10天 米框返回9天，最早的一天是2025-01-02
+        assert len(df_tradedays) == 9  # 共计10天 米框返回9天，最早的一天是2025-01-02
         assert sum(df_tradedays["is_tradeday"]) == 7  # 其中7个交易日
 
     def test_get_info_unregistered_type(self):

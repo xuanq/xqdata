@@ -189,6 +189,29 @@ class TestRQDataFactorApi:
         assert len(df.columns) == 3
         assert len(df) == 14  # 7交易日 * 2只股票
 
+    def test_rq_index_weights_ex(self):
+        """测试内部的rq_index_weights_ex函数"""
+        from xqdata.rq.func_factor import rq_index_weights_ex
+
+        factors = ["constituent_weight"]
+        codes = ["000300.XSHG", "000016.XSHG"]
+
+        df = rq_index_weights_ex(
+            factors=factors,
+            codes=codes,
+            start_time="2025-01-02",
+            end_time="2025-01-03",
+            frequency="D",
+        )
+
+        # 验证包含必要的列
+        assert df.index.names == ["datetime", "code", "object"]
+        # 验证包含请求的因子列
+        for factor in factors:
+            assert factor in df.columns
+        assert len(df.columns) == 1
+        assert len(df) == 700  # (沪深300+上证50) * 2个交易日
+
     def test_rq_get_factor_exposure(self):
         """测试内部的rq_get_instrument_industry函数"""
         from xqdata.rq.func_factor import rq_get_factor_exposure
@@ -242,7 +265,7 @@ class TestRQDataFactorApi:
             "is_st",
             "ebit_lyr",
             "size",
-            "total_a"
+            "total_a",
         ]  # ebit_lyr尚未定义，引用default的rq_get_factor获取
         codes = ["000001.XSHE", "300750.XSHE"]
 
@@ -287,3 +310,23 @@ class TestRQDataFactorApi:
         )
 
         assert extra_param_df.equals(default_param_df) is False
+
+    def test_api_get_dualkey_factor_panel(self):
+        """测试API的get_dualkey_factor方法"""
+        factors = ["constituent_weight"]  # 目前仅支持constituent_weight
+        codes = ["000300.XSHG", "000016.XSHG"]
+
+        df = self.api.get_dualkey_factor(
+            factors=factors,
+            codes=codes,
+            start_time="2025-01-02",
+            end_time="2025-01-03",
+            frequency="D",
+            panel=True,
+        )
+
+        # 验证包含请求的因子列
+        for factor in factors:
+            assert factor in df.columns
+
+        assert len(df) == 700  # (300+50) * 2只股票

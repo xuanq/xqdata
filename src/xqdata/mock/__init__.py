@@ -175,7 +175,7 @@ class MockDataApi(DataApi):
         self,
         factors: Union[str, List[str]],
         codes: Union[str, List[str]],
-        objects: Union[str, List[str]],
+        objects: Union[str, List[str]] = None,
         start_time=None,
         end_time=None,
         frequency="D",

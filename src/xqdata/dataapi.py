@@ -71,7 +71,7 @@ class DataApi(metaclass=ABCMeta):
         self,
         factors: Union[str, List[str]],
         codes: Union[str, List[str]],
-        objects: Union[str, List[str]],
+        objects: Union[str, List[str]] = None,
         start_time: Optional[Union[str, datetime.datetime, datetime.date]] = None,
         end_time: Optional[Union[str, datetime.datetime, datetime.date]] = None,
         frequency: str = "D",

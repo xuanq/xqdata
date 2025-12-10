@@ -1,13 +1,14 @@
-from .func_info import rq_get_trading_dates, rq_all_instruments
 from .func_factor import (
     rq_get_factor,
-    rq_get_price,
-    rq_is_suspended,
-    rq_is_st_stock,
-    rq_get_instrument_industry,
     rq_get_factor_exposure,
+    rq_get_instrument_industry,
+    rq_get_price,
     rq_get_shares,
+    rq_index_weights_ex,
+    rq_is_st_stock,
+    rq_is_suspended,
 )
+from .func_info import rq_all_instruments, rq_get_trading_dates
 
 # RQData API配置
 INFO_CONFIG = {
@@ -147,11 +148,13 @@ FACTOR_CONFIG = {
     "preferred_shares": rq_get_shares,
     "total_hk": rq_get_shares,
     "total_hk1": rq_get_shares,
+    # 成分股权重
+    "constituent_weight": rq_index_weights_ex,
 }
 
 
 FACTOR_EXTRA_PARAMS = {
     "rq_get_price": ["skip_suspended", "market"],
     "rq_get_factor_exposure": ["industry_mapping", "model", "market"],
-    "rq_get_shares": ["market"]
+    "rq_get_shares": ["market"],
 }
