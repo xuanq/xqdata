@@ -6,6 +6,7 @@ from .func_factor import (
     rq_is_st_stock,
     rq_get_instrument_industry,
     rq_get_factor_exposure,
+    rq_get_shares,
 )
 
 # RQData API配置
@@ -138,10 +139,19 @@ FACTOR_CONFIG = {
     "non_linear_size": rq_get_factor_exposure,
     "leverage": rq_get_factor_exposure,
     "growth": rq_get_factor_exposure,
+    # 流通股
+    "total": rq_get_shares,
+    "authorized_shares": rq_get_shares,
+    "total_a": rq_get_shares,
+    "not_hk_shares": rq_get_shares,
+    "preferred_shares": rq_get_shares,
+    "total_hk": rq_get_shares,
+    "total_hk1": rq_get_shares,
 }
 
 
 FACTOR_EXTRA_PARAMS = {
     "rq_get_price": ["skip_suspended", "market"],
     "rq_get_factor_exposure": ["industry_mapping", "model", "market"],
+    "rq_get_shares": ["market"]
 }

@@ -242,6 +242,7 @@ class TestRQDataFactorApi:
             "is_st",
             "ebit_lyr",
             "size",
+            "total_a"
         ]  # ebit_lyr尚未定义，引用default的rq_get_factor获取
         codes = ["000001.XSHE", "300750.XSHE"]
 

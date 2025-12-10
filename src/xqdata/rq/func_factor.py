@@ -375,39 +375,25 @@ def rq_get_factor_exposure(
     return data.set_index(["datetime", "code"])
 
 
-# def _get_shares(codes: str | List[str], start_date, end_date, fields=None):
-#     # args map
-#     if isinstance(codes, str):
-#         codes = [codes]
-#     code_mapper = get_code_mapper(codes)
-#     rq_codes = [code_mapper.get(code, code) for code in codes]
-#     FIELDS_MAPPER = {
-#         "total": "total_shares",
-#         "circulation_a": "circulating_shares",
-#         "free_circulation": "free_circulating_shares",
-#         "non_circulation_a": "non_circulating_shares",
-#         "total_a": "total_a_shares",
-#         "date": "datetime",
-#     }
-#     FIELDS_MAPPER.update(FIELDS_RQ2XQ)
-#     FIELDS_MAPPER2RQ = {v: k for k, v in FIELDS_MAPPER.items()}
-#     if fields is not None:
-#         if isinstance(fields, str):
-#             fields = [fields]
-#         rq_feields = [FIELDS_MAPPER2RQ.get(field, field) for field in fields]
-#     else:
-#         rq_feields = None
-#     # get_data
-#     data: pd.DataFrame = rq.get_shares(
-#         rq_codes, start_date, end_date, fields=rq_feields
-#     ).reset_index()
-#     # map column names
-#     data.rename(columns=FIELDS_MAPPER, inplace=True)
-#     # map codes
-#     reversed_code_mapper = {v: k for k, v in code_mapper.items()}
-#     data.code = data.code.map(reversed_code_mapper)
-#     # fomat data
-#     return data.set_index(["datetime", "code"])
+def rq_get_shares(
+    factors: Union[str, List[str]],
+    codes: Union[str, List[str]],
+    start_time: Optional[Union[str, datetime, date]] = None,
+    end_time: Optional[Union[str, datetime, date]] = None,
+    frequency: str = "D",
+    **kwargs,
+):
+    # args map
+    if isinstance(codes, str):
+        codes = [codes]
+    # get_data
+    data: pd.DataFrame = rq.get_shares(
+        codes, start_date=start_time, end_date=end_time, fields=factors, **kwargs
+    ).reset_index()
+    # map column names
+    rename_columns(data)
+    # fomat data
+    return data.set_index(["datetime", "code"])
 
 
 # def _index_weights_ex(code: str, start_date=None, end_date=None):
