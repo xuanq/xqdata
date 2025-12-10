@@ -1,5 +1,4 @@
-import rqdatac as rq
-
+from .func_info import rq_get_trading_dates, rq_all_instruments
 from .func_factor import (
     rq_get_factor,
     rq_get_price,
@@ -8,51 +7,40 @@ from .func_factor import (
     rq_get_instrument_industry,
     rq_get_factor_exposure,
 )
-from .utils import rename_columns
 
 # RQData API配置
 INFO_CONFIG = {
     "stock": {
-        "rq_func": rq.all_instruments,
-        "rq_params": {"type": "CS"},
-        "post_process": rename_columns,
-        "post_process_args": {},
+        "func": rq_all_instruments,
+        "params": {"type": "CS"},
     },
     "fund": {
-        "rq_func": rq.all_instruments,
-        "rq_params": {"type": "FUND"},
-        "post_process": rename_columns,
-        "post_process_args": {},
+        "func": rq_all_instruments,
+        "params": {"type": "FUND"},
     },
     "futures": {
-        "rq_func": rq.all_instruments,
-        "rq_params": {"type": "Future"},
-        "post_process": rename_columns,
-        "post_process_args": {},
+        "func": rq_all_instruments,
+        "params": {"type": "Future"},
     },
     "option": {
-        "rq_func": rq.all_instruments,
-        "rq_params": {"type": "Option"},
-        "post_process": rename_columns,
-        "post_process_args": {},
+        "func": rq_all_instruments,
+        "params": {"type": "Option"},
     },
     "convertible": {
-        "rq_func": rq.all_instruments,
-        "rq_params": {"type": "Convertible"},
-        "post_process": rename_columns,
-        "post_process_args": {},
+        "func": rq_all_instruments,
+        "params": {"type": "Convertible"},
     },
     "etf": {
-        "rq_func": rq.all_instruments,
-        "rq_params": {"type": "ETF"},
-        "post_process": rename_columns,
-        "post_process_args": {},
+        "func": rq_all_instruments,
+        "params": {"type": "ETF"},
     },
     "lof": {
-        "rq_func": rq.all_instruments,
-        "rq_params": {"type": "LOF"},
-        "post_process": rename_columns,
-        "post_process_args": {},
+        "func": rq_all_instruments,
+        "params": {"type": "LOF"},
+    },
+    "tradedays": {
+        "func": rq_get_trading_dates,
+        "params": {},
     },
 }
 

@@ -44,16 +44,12 @@ class RQDataApi(DataApi):
         config = self.info_config[type]
 
         # 合并参数
-        params = config["rq_params"].copy()
+        params = config["params"].copy()
         params.update(kwargs)
 
         # 调用对应的RQData接口
         try:
-            result = config["rq_func"](**params)
-
-            # 如果有后处理函数，则应用后处理
-            if config["post_process"] and callable(config["post_process"]):
-                result = config["post_process"](result, **config["post_process_args"])
+            result = config["func"](**params)
 
             return result
         except Exception:
@@ -64,26 +60,20 @@ class RQDataApi(DataApi):
     def register_info_type(
         self,
         type_name: str,
-        rq_func: Callable,
-        rq_params: Dict[str, Any],
-        post_process: Callable = None,
-        post_process_args: Dict[str, Any] = None,
+        func: Callable,
+        params: Dict[str, Any],
     ):
         """
         注册新的信息类型查询配置
 
         Args:
             type_name: 类型名称
-            rq_func: 调用的RQData函数
-            rq_params: 传递给RQData函数的参数
-            post_process: 后处理函数
-            post_process_args: 传递给后处理函数的参数
+            func: 调用的函数(RQData接口或包装后的函数)
+            params: 传递给函数的参数
         """
         self.info_config[type_name] = {
-            "rq_func": rq_func,
-            "rq_params": rq_params,
-            "post_process": post_process,
-            "post_process_args": post_process_args or {},
+            "func": func,
+            "params": params,
         }
 
     def set_extra_param(self, func_name: str, param_name: str, param_value: Any):

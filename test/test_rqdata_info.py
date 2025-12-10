@@ -44,6 +44,13 @@ class TestRQDataApi:
             ]
             assert all(col in df_stock.columns for col in expected_columns)
 
+    def test_get_info_stock_date_param(self):
+        """测试获取指定日期可交易的股票信息"""
+        # 获取股票信息
+        df_stock_full = self.api.get_info("stock")
+        df_stock_dated = self.api.get_info("stock",date=pd.Timestamp("2025-01-02"))
+        assert len(df_stock_full)>len(df_stock_dated)
+
     def test_get_info_fund(self):
         """测试获取基金信息"""
         # 获取基金信息
@@ -101,6 +108,25 @@ class TestRQDataApi:
             ]
             assert all(col in df_etf.columns for col in expected_columns)
 
+    def test_get_info_tradedays(self):
+        """测试获取交易日信息"""
+        # 获取ETF信息
+        df_tradedays = self.api.get_info("tradedays")
+        # 验证返回的是DataFrame或者是None
+        assert isinstance(df_tradedays, pd.DataFrame)
+
+        assert df_tradedays.columns == ["is_tradeday"]
+        assert df_tradedays.loc["2025-01-01"].squeeze() == 0  # 非交易日
+        assert df_tradedays.loc["2025-01-10"].squeeze() == 1  # 交易日
+
+    def test_get_info_tradedays_with_param(self):
+        """测试获取区间交易日信息(带额外参数)"""
+        # 获取ETF信息
+        df_tradedays = self.api.get_info("tradedays", start_date="2025-01-01", end_date="2025-01-10")
+        # 验证返回的是DataFrame或者是None
+        assert len(df_tradedays) == 9 #共计10天 米框返回9天，最早的一天是2025-01-02
+        assert sum(df_tradedays["is_tradeday"]) == 7  # 其中7个交易日
+
     def test_get_info_unregistered_type(self):
         """测试获取未注册类型的信息"""
         # 获取未注册类型的信息，应该发出警告并返回空DataFrame
@@ -114,14 +140,10 @@ class TestRQDataApi:
 
     def test_register_new_info_type(self):
         """测试注册新的信息类型"""
-        import rqdatac as rq
-
-        from xqdata.rq.func_factor import rename_columns
+        from xqdata.rq.func_info import rq_all_instruments
 
         # 注册新的信息类型
-        self.api.register_info_type(
-            "test_stock", rq.all_instruments, {"type": "CS"}, rename_columns, {}
-        )
+        self.api.register_info_type("test_stock", rq_all_instruments, {"type": "CS"})
 
         # 验证新类型已注册
         assert "test_stock" in self.api.info_config

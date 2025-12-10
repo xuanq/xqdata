@@ -4,7 +4,7 @@ import rqdatac as rq
 from .utils import rename_columns
 
 
-def _get_trading_dates(start_date=None, end_date=None, market="cn"):
+def rq_get_trading_dates(start_date=None, end_date=None, market="cn"):
     if start_date is None:
         start_date = "1990-01-01"
     if end_date is None:
@@ -13,7 +13,7 @@ def _get_trading_dates(start_date=None, end_date=None, market="cn"):
     data = pd.to_datetime(data)
     data.name = "datetime"
     tradeday_df = (
-        pd.DataFrame(data=True, index=data, columns=["SSE", "SZSE"])
+        pd.DataFrame(data=True, index=data, columns=["is_tradeday"])
         .resample("D")
         .last()
         .fillna(0)
@@ -21,7 +21,7 @@ def _get_trading_dates(start_date=None, end_date=None, market="cn"):
     return tradeday_df
 
 
-def _all_instruments(
+def rq_all_instruments(
     type: str,
     market: str = "cn",
     date=None,

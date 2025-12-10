@@ -274,7 +274,7 @@ class TestRQDataFactorApi:
             end_time="2025-01-10",
             frequency="D",
             panel=True,
-        )  
+        )
         self.api.set_extra_param("rq_get_factor_exposure", "model", "v2")
         extra_param_df = self.api.get_factor(
             factors=factors,
