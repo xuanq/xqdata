@@ -25,6 +25,10 @@ xqdata = "xqdata:main"
 rq = [
     "rqdatac>=3.3.2",
 ]
+ddb = [
+    "ddbtools>=0.1.14",
+    "dolphindb>=3.0.4.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.9.15,<0.10.0"]
