@@ -27,7 +27,7 @@ services:
       - db
   
   db:
-    image: dolphindb/dolphindb:v3.00.1.2
+    image: dolphindb/dolphindb:auto
     container_name: dolphindb
     ports:
       - "8848:8848"

@@ -14,6 +14,7 @@
 		"HFN_APPID": "${localEnv:HFN_APPID}",
 		"HFN_APPKEY": "${localEnv:HFN_APPKEY}"
 	},
+	"initializeCommand": "bash .devcontainer/ddbimage.sh",
 	"postCreateCommand": "[ -f pyproject.toml ] && (uv lock && uv sync --all-extras) || :",
 	"forwardPorts": [
 		8848
