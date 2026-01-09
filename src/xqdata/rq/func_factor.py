@@ -22,50 +22,13 @@ def rq_get_price(
     if isinstance(codes, str):
         codes = [codes]
 
-    # Define all valid price fields
-    valid_price_fields = (
-        "open",
-        "high",
-        "low",
-        "close",
-        "volume",
-        "trading_date",
-        "last",
-        "prev_close",
-        "total_turnover",
-        "limit_up",
-        "limit_down",
-        "a1",
-        "a2",
-        "a3",
-        "a4",
-        "a5",
-        "b1",
-        "b2",
-        "b3",
-        "b4",
-        "b5",
-        "a1_v",
-        "a2_v",
-        "a3_v",
-        "a4_v",
-        "a5_v",
-        "b1_v",
-        "b2_v",
-        "b3_v",
-        "b4_v",
-        "b5_v",
-        "change_rate",
-        "num_trades",
-        "open_interest",
-        "prev_settlement",
-    )
-
     # Initialize result dataframe
     data = pd.DataFrame()
 
     # Process regular price factors (without adjustment)
-    price_factors = [f for f in factors if f in valid_price_fields]
+    price_factors = [
+        f for f in factors if not (f.endswith("_post") or f.endswith("_pre"))
+    ]
 
     if price_factors:
         # Get data for regular price factors

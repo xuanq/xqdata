@@ -117,6 +117,7 @@ FACTOR_CONFIG = {
     "num_trades": rq_get_price,
     "open_interest": rq_get_price,
     "prev_settlement": rq_get_price,
+    "settlement": rq_get_price,
     "open_post": rq_get_price,
     "high_post": rq_get_price,
     "low_post": rq_get_price,
