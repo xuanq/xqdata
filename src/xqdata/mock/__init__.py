@@ -18,12 +18,15 @@ class MockDataApi(DataApi):
         self._authenticated = True
         # 初始化模拟数据API连接等
         self._mock_info_schemas: Dict[str, Dict[str, str]] = {}
+        self._mock_info_index: Dict[str, pd.Index] = {}
 
     def auth(self, *args, **kwargs) -> None:
         # 实现模拟数据API的认证逻辑
         self._authenticated = True
 
-    def set_mock_info(self, name: str, schema: Dict[str, str]) -> None:
+    def set_mock_info(
+        self, name: str, schema: Dict[str, str], index: pd.Index = None
+    ) -> None:
         """
         设置模拟数据的schema信息
 
@@ -32,6 +35,8 @@ class MockDataApi(DataApi):
             schema: 字段名到数据类型的映射，例如{"code":"str","listed_date":"datetime","name":"str","market_value":"float64"}
         """
         self._mock_info_schemas[name] = schema
+        if index is not None:
+            self._mock_info_index[name] = index
 
     def _generate_mock_data(
         self, schema: Dict[str, str], index: pd.Index
@@ -95,12 +100,9 @@ class MockDataApi(DataApi):
 
         # 获取schema
         schema = self._mock_info_schemas[type]
-
+        index = self._mock_info_index.get(type, None)
         # 提供了index
-        if "index" in kwargs:
-            index = kwargs["index"]
-        # 生成随机长度的模拟索引
-        else:
+        if index is None:
             index = pd.Index(np.arange(random.randint(30, 100)))
         df = self._generate_mock_data(schema, index)
 
