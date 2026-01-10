@@ -79,8 +79,8 @@ class TestMockDataApi:
     def test_provided_index(self):
         index = pd.date_range("20250101", "20251231")
         test_schema = {"is_tradeday": "bool"}
-        self.api.set_mock_info("test_data", test_schema)
-        df_test = self.api.get_info("test_data", index=index)
+        self.api.set_mock_info("test_data", test_schema, index)
+        df_test = self.api.get_info("test_data")
         assert isinstance(df_test, pd.DataFrame)
         assert len(df_test) == 365
         assert df_test["is_tradeday"].dtype == "bool"
