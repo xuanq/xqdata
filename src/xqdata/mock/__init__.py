@@ -33,7 +33,9 @@ class MockDataApi(DataApi):
         """
         self._mock_info_schemas[name] = schema
 
-    def _generate_mock_data(self, schema: Dict[str, str], length: int) -> pd.DataFrame:
+    def _generate_mock_data(
+        self, schema: Dict[str, str], index: pd.Index
+    ) -> pd.DataFrame:
         """
         根据schema生成模拟数据
 
@@ -45,7 +47,7 @@ class MockDataApi(DataApi):
             生成的DataFrame
         """
         data = {}
-
+        length = len(index)
         for column, dtype in schema.items():
             if dtype == "str":
                 # 生成随机字符串
@@ -70,7 +72,7 @@ class MockDataApi(DataApi):
                 # 默认生成字符串
                 data[column] = [f"{column}_{i}" for i in range(length)]
 
-        return pd.DataFrame(data)
+        return pd.DataFrame(data, index=index)
 
     def get_info(self, type: str, **kwargs) -> pd.DataFrame:
         """
@@ -94,11 +96,15 @@ class MockDataApi(DataApi):
         # 获取schema
         schema = self._mock_info_schemas[type]
 
-        # 生成随机长度的模拟数据 (30-100)
-        length = random.randint(30, 100)
-        df = self._generate_mock_data(schema, length)
+        # 提供了index
+        if "index" in kwargs:
+            index = kwargs["index"]
+        # 生成随机长度的模拟索引
+        else:
+            index = pd.Index(np.arange(random.randint(30, 100)))
+        df = self._generate_mock_data(schema, index)
 
-        return df.reset_index(drop=True)
+        return df
 
     def get_factor(
         self,
